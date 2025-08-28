@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrivIA</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0c0a1a;
+            --primary-color: #8a2be2;
+            --secondary-color: #4169e1;
+            --accent-color: #00ffff;
+            --text-color: #e0e0e0;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(0, 255, 255, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            background-image:
+                radial-gradient(circle at 15% 50%, rgba(138, 43, 226, 0.2), transparent 30%),
+                radial-gradient(circle at 85% 30%, rgba(65, 105, 225, 0.2), transparent 30%);
+        }
+
+        .container {
+            width: 90%;
+            max-width: 800px;
+            padding: 2rem;
+            background: var(--card-bg);
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            text-align: center;
+        }
+        
+        .screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1, h2 {
+            font-family: 'Roboto Mono', monospace;
+            text-shadow: 0 0 10px var(--accent-color);
+        }
+
+        h1 {
+            font-size: 3rem;
+            color: var(--accent-color);
+            margin-bottom: 1rem;
+        }
+        
+        h2 {
+            font-size: 1.8rem;
+            color: var(--text-color);
+        }
+
+        p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .input-field {
+            width: 100%;
+            max-width: 400px;
+            padding: 1rem;
+            font-size: 1.2rem;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-color);
+            text-align: center;
+            font-family: 'Space Grotesk', sans-serif;
+            transition: box-shadow 0.3s;
+        }
+
+        .input-field:focus {
+            outline: none;
+            box-shadow: 0 0 15px var(--accent-color);
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--bg-color);
+            background: linear-gradient(45deg, var(--accent-color), var(--secondary-color));
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 20px var(--accent-color);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: var(--accent-color);
+            border: 1px solid var(--accent-color);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(0, 255, 255, 0.1);
+        }
+
+        #countdown {
+            font-size: 8rem;
+            font-weight: bold;
+            color: var(--accent-color);
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        /* Glossary Styles */
+        #glossary-card {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            text-align: left;
+        }
+
+        .term-container {
+            width: 100%;
+            background: rgba(0,0,0,0.2);
+            padding: 1.5rem;
+            border-radius: 10px;
+            border-left: 3px solid var(--primary-color);
+        }
+
+        .term-container:last-child {
+            border-left-color: var(--secondary-color);
+        }
+
+        .term-container h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--accent-color);
+        }
+        
+        .term-container p {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .term-container .example {
+            font-style: italic;
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+
+        #glossary-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .nav-arrow {
+            font-size: 3rem;
+            cursor: pointer;
+            color: var(--accent-color);
+            transition: transform 0.2s;
+            user-select: none;
+        }
+
+        .nav-arrow:hover {
+            transform: scale(1.2);
+        }
+        
+        .nav-arrow.hidden {
+            visibility: hidden;
+        }
+
+        /* Quiz Styles */
+        #question-progress {
+            font-size: 1rem;
+            color: var(--accent-color);
+        }
+        
+        #options-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            width: 100%;
+        }
+        
+        .option-btn {
+            width: 100%;
+            padding: 1.5rem;
+            font-size: 1.1rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.2s;
+        }
+        
+        .option-btn:hover:not(:disabled) {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+
+        /* AJUSTE 1: Corrección para efecto hover en móviles */
+        @media (hover: none) and (pointer: coarse) {
+            .option-btn:hover {
+                background-color: var(--card-bg);
+            }
+        }
+
+        .option-btn.correct {
+            background-color: #28a745;
+            color: white;
+            border-color: #28a745;
+        }
+        .option-btn.incorrect {
+            background-color: #dc3545;
+            color: white;
+            border-color: #dc3545;
+        }
+
+        .option-btn:disabled {
+            cursor: not-allowed;
+        }
+        
+        #results-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        /* Responsive adjustments */
+        @media (min-width: 768px) {
+            #glossary-card {
+                flex-direction: row;
+            }
+            .term-container {
+                width: 48%;
+            }
+            #options-container {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div id="welcome-screen" class="screen active">
+            <h1>TrivIA</h1>
+            <p>Pon a prueba tu conocimiento sobre Inteligencia Artificial. <br/>Ingresa tu nombre para comenzar.</p>
+            <input type="text" id="username" class="input-field" placeholder="Tu alias aquí...">
+            <button id="start-button" class="btn">Iniciar aprendizaje</button>
+        </div>
+
+        <div id="countdown-screen" class="screen">
+            <div id="countdown">5</div>
+        </div>
+        
+        <div id="message-screen" class="screen">
+            <h2>¡Comenzamos!</h2>
+        </div>
+
+        <div id="glossary-screen" class="screen">
+            <h2>Glosario Interactivo</h2>
+            <div id="glossary-card">
+                </div>
+            <div id="glossary-nav">
+                <span id="prev-card" class="nav-arrow">&lt;</span>
+                <span id="card-counter">1 / 15</span>
+                <span id="next-card" class="nav-arrow">&gt;</span>
+            </div>
+            <button id="start-quiz-button" class="btn" style="display: none;">¡Iniciar Quiz!</button>
+            <p id="quiz-motivation-msg" style="margin-top: 1rem;"></p>
+        </div>
+
+        <div id="quiz-screen" class="screen">
+            <h2 id="question-text"></h2>
+            <p id="question-progress"></p>
+            <div id="options-container">
+                </div>
+        </div>
+
+        <div id="results-screen" class="screen">
+            <h2 id="results-title"></h2>
+            <p id="results-score"></p>
+            <p id="results-motivation"></p>
+            <div id="results-buttons">
+                <button id="restart-quiz" class="btn">Reiniciar Quiz</button>
+                <button id="back-to-glossary" class="btn btn-secondary">Regresar a Glosario</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA FROM PDF ---
+        const glossaryData = [
+            { term1: "Bot", desc1: "Ejecuta tareas predefinidas, con reglas fijas.", ex1: "un chatbot de preguntas frecuentes en una web.", term2: "Agente IA", desc2: "Actúa con autonomia, aprende y toma decisiones.", ex2: "Copilot sugiriendo código en un proyecto." },
+            { term1: "Machine Learning", desc1: "Modelos que aprenden de datos con features definidos por humanos.", ex1: "un sistema que predice ventas basado en datos históricos.", term2: "Deep Learning", desc2: "Subconjunto de ML con redes neuronales profundas.", ex2: "el reconocimiento de voz de un asistente virtual." },
+            { term1: "IA Generativa", desc1: "Crea contenido nuevo (texto, imágenes, música).", ex1: "MidJourney creando una imagen a partir de texto.", term2: "IA Predictiva", desc2: "Predice resultados a partir de patrones históricos.", ex2: "un modelo que calcula el riesgo financiero de un cliente." },
+            { term1: "NLP", desc1: "Campo de la IA que procesa el lenguaje humano.", ex1: "una herramienta de análisis de sentimiento en redes sociales.", term2: "LLM", desc2: "Modelo entrenado con grandes cantidades de texto.", ex2: "ChatGPT generando un resumen de un documento largo." },
+            { term1: "Asistente Virtual", desc1: "Apoya en productividad, tareas administrativas.", ex1: "Alexa configurando un recordatorio para una reunión.", term2: "Embajador Digital", desc2: "Representa una marca con personalidad propia.", ex2: "una influencer virtual que promociona productos." },
+            { term1: "Entrenamiento", desc1: "Proceso de enseñar un modelo desde cero.", ex1: "alimentar un modelo de visión con miles de imágenes iniciales.", term2: "Fine-tuning", desc2: "Ajuste fino de un modelo ya entrenado.", ex2: "adaptar un LLM general para que responda con jerga médica." },
+            { term1: "Prompt", desc1: "Instrucción básica dada a un modelo.", ex1: "escribir 'resume este texto' en una IA.", term2: "Prompt Engineering", desc2: "Técnica avanzada para diseñar prompts efectivos.", ex2: "diseñar un prompt que guíe tono, estilo y formato de salida." },
+            { term1: "Dataset", desc1: "Conjunto estructurado y limitado de datos.", ex1: "una colección de 10,000 imágenes de gatos etiquetadas.", term2: "Data Lake", desc2: "Repositorio amplio que guarda datos en bruto.", ex2: "un almacén con logs, videos e imágenes sin procesar." },
+            { term1: "Aprendizaje Supervisado", desc1: "Usa datos etiquetados para entrenar.", ex1: "clasificar correos como 'spam' o 'no spam' usando ejemplos previos.", term2: "Aprendizaje No Supervisado", desc2: "Descubre patrones sin etiquetas.", ex2: "agrupar clientes por comportamiento de compra sin categorías previas." },
+            { term1: "API", desc1: "Interfaz para conectar servicios o aplicaciones.", ex1: "una app del clima que usa la API de un servicio meteorológico.", term2: "Framework", desc2: "Conjunto de herramientas para construir aplicaciones.", ex2: "usar TensorFlow para construir un modelo de predicción." },
+            { term1: "Cloud AI", desc1: "Procesamiento en la nube con alta capacidad.", ex1: "Google Cloud AI entrenando un modelo complejo.", term2: "Edge AI", desc2: "Procesamiento local en dispositivos.", ex2: "un auto autónomo procesando datos de sensores en tiempo real." },
+            { term1: "Reconocimiento de Imagen", desc1: "Identificar objetos o patrones en imágenes.", ex1: "un celular que detecta y enfoca las caras en una foto.", term2: "Computer Vision", desc2: "Campo más amplio que incluye análisis e interpretación visual.", ex2: "un sistema de seguridad que analiza video para detectar comportamientos." },
+            { term1: "Speech-to-Text", desc1: "Convierte voz en texto.", ex1: "la transcripción automática de una entrevista grabada.", term2: "Text-to-Speech", desc2: "Convierte texto en voz.", ex2: "un lector de pantalla para personas con discapacidad visual." },
+            { term1: "Avatar Digital", desc1: "Representación visual de una persona real o ficticia.", ex1: "un personaje 3D usado por un influencer virtual.", term2: "Gemelo Digital", desc2: "Replica virtual de un sistema u objeto físico.", ex2: "la simulación de una fábrica para optimizar su producción." },
+            { term1: "Bias en IA", desc1: "Sesgo en el modelo causado por datos no representativos.", ex1: "un sistema de contratación que discrimina por género.", term2: "Ruido en Datos", desc2: "Variabilidad aleatoria que afecta calidad de datos.", ex2: "errores de lectura de un sensor o inconsistencias en una base de datos." }
+        ];
+
+        // --- DOM ELEMENTS ---
+        const screens = document.querySelectorAll('.screen');
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const countdownScreen = document.getElementById('countdown-screen');
+        const messageScreen = document.getElementById('message-screen');
+        const glossaryScreen = document.getElementById('glossary-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultsScreen = document.getElementById('results-screen');
+        const startButton = document.getElementById('start-button');
+        const usernameInput = document.getElementById('username');
+        const countdownDisplay = document.getElementById('countdown');
+        const glossaryCard = document.getElementById('glossary-card');
+        const prevCardBtn = document.getElementById('prev-card');
+        const nextCardBtn = document.getElementById('next-card');
+        const cardCounter = document.getElementById('card-counter');
+        const startQuizButton = document.getElementById('start-quiz-button');
+        const quizMotivationMsg = document.getElementById('quiz-motivation-msg');
+        const questionText = document.getElementById('question-text');
+        const questionProgress = document.getElementById('question-progress');
+        const optionsContainer = document.getElementById('options-container');
+        const resultsTitle = document.getElementById('results-title');
+        const resultsScore = document.getElementById('results-score');
+        const resultsMotivation = document.getElementById('results-motivation');
+        const restartQuizBtn = document.getElementById('restart-quiz');
+        const backToGlossaryBtn = document.getElementById('back-to-glossary');
+
+        // --- GAME STATE ---
+        let username = "Aprendiz";
+        let currentCardIndex = 0;
+        let quizQuestions = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        const quizMotivations = ["¿Listo para desafiar a los algoritmos?", "¡Demuestra que eres más inteligente que una IA!", "El futuro es ahora. ¿Estás preparado?", "¡Es hora de conectar tus neuronas!", "¡Convierte datos en conocimiento!"];
+        const resultsMotivations = ["¡Cada respuesta es un paso más cerca de la maestría! Sigue así.", "El conocimiento es poder. ¡Continúa expandiendo tu universo de IA!", "¡Excelente trabajo! La curiosidad es el motor del aprendizaje.", "No te detengas ahora. El mundo de la IA es vasto y emocionante.", "¡Felicidades! Has entrenado tu cerebro con éxito."];
+
+        // --- FUNCTIONS ---
+        function switchScreen(screenId) {
+            screens.forEach(screen => screen.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function startCountdown() {
+            let count = 5;
+            countdownDisplay.textContent = count;
+            const interval = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    countdownDisplay.textContent = count;
+                } else {
+                    clearInterval(interval);
+                    switchScreen('message-screen');
+                    setTimeout(() => {
+                        switchScreen('glossary-screen');
+                        displayGlossaryCard();
+                    }, 1500);
+                }
+            }, 1000);
+        }
+
+        function displayGlossaryCard() {
+            const item = glossaryData[currentCardIndex];
+            glossaryCard.innerHTML = `
+                <div class="term-container">
+                    <h3>${item.term1}</h3>
+                    <p>${item.desc1}</p>
+                    <p class="example">Ej: ${item.ex1}</p>
+                </div>
+                <div class="term-container">
+                    <h3>${item.term2}</h3>
+                    <p>${item.desc2}</p>
+                    <p class="example">Ej: ${item.ex2}</p>
+                </div>
+            `;
+            cardCounter.textContent = `${currentCardIndex + 1} / ${glossaryData.length}`;
+            prevCardBtn.classList.toggle('hidden', currentCardIndex === 0);
+            nextCardBtn.classList.toggle('hidden', currentCardIndex === glossaryData.length - 1);
+            startQuizButton.style.display = (currentCardIndex === glossaryData.length - 1) ? 'block' : 'none';
+            if (startQuizButton.style.display === 'block') {
+                quizMotivationMsg.textContent = quizMotivations[Math.floor(Math.random() * quizMotivations.length)];
+            } else {
+                quizMotivationMsg.textContent = '';
+            }
+        }
+        
+        function generateQuiz() {
+            const allTerms = glossaryData.flatMap(item => [
+                { term: item.term1, definition: item.desc1, example: item.ex1 },
+                { term: item.term2, definition: item.desc2, example: item.ex2 }
+            ]);
+            
+            // AJUSTE 2: Barajar y tomar solo 10 preguntas
+            const shuffledTerms = [...allTerms].sort(() => 0.5 - Math.random()).slice(0, 10);
+            
+            quizQuestions = shuffledTerms.map(correctAnswer => {
+                const incorrectOptions = allTerms
+                    .filter(term => term.term !== correctAnswer.term)
+                    .sort(() => 0.5 - Math.random())
+                    .slice(0, 3)
+                    .map(option => option.term);
+
+                const options = [correctAnswer.term, ...incorrectOptions].sort(() => 0.5 - Math.random());
+                
+                // AJUSTE 3: Alternar entre preguntas de definición y de escenario
+                let questionText;
+                if (Math.random() > 0.5) {
+                    questionText = `¿Qué término se define como: "${correctAnswer.definition}"?`;
+                } else {
+                    questionText = `Si un proyecto implica ${correctAnswer.example}, ¿qué concepto de IA se está aplicando?`;
+                }
+
+                return { question: questionText, options: options, answer: correctAnswer.term };
+            });
+        }
+        
+        function displayQuestion() {
+            if (currentQuestionIndex < quizQuestions.length) {
+                const q = quizQuestions[currentQuestionIndex];
+                questionText.textContent = q.question;
+                questionProgress.textContent = `Pregunta ${currentQuestionIndex + 1} de ${quizQuestions.length}`;
+                optionsContainer.innerHTML = '';
+                q.options.forEach(option => {
+                    const button = document.createElement('button');
+                    button.textContent = option;
+                    button.classList.add('option-btn');
+                    button.addEventListener('click', () => selectAnswer(option, q.answer, button));
+                    optionsContainer.appendChild(button);
+                });
+            } else {
+                showResults();
+            }
+        }
+        
+        function selectAnswer(selectedOption, correctAnswer, button) {
+            const buttons = optionsContainer.querySelectorAll('.option-btn');
+            buttons.forEach(btn => {
+                btn.disabled = true;
+                if (btn.textContent === correctAnswer) btn.classList.add('correct');
+            });
+            
+            if (selectedOption === correctAnswer) {
+                score++;
+            } else {
+                button.classList.add('incorrect');
+            }
+
+            setTimeout(() => {
+                currentQuestionIndex++;
+                displayQuestion();
+            }, 1500);
+        }
+        
+        function showResults() {
+            switchScreen('results-screen');
+            resultsTitle.textContent = `¡Resultados para ${username}!`;
+            resultsScore.textContent = `Obtuviste ${score} de ${quizQuestions.length} respuestas correctas.`;
+            resultsMotivation.textContent = resultsMotivations[Math.floor(Math.random() * resultsMotivations.length)];
+        }
+
+        // --- EVENT LISTENERS ---
+        startButton.addEventListener('click', () => {
+            const name = usernameInput.value.trim();
+            if (name) username = name;
+            switchScreen('countdown-screen');
+            startCountdown();
+        });
+
+        nextCardBtn.addEventListener('click', () => {
+            if (currentCardIndex < glossaryData.length - 1) displayGlossaryCard(++currentCardIndex);
+        });
+
+        prevCardBtn.addEventListener('click', () => {
+            if (currentCardIndex > 0) displayGlossaryCard(--currentCardIndex);
+        });
+        
+        startQuizButton.addEventListener('click', () => {
+            currentQuestionIndex = 0;
+            score = 0;
+            generateQuiz();
+            switchScreen('quiz-screen');
+            displayQuestion();
+        });
+        
+        restartQuizBtn.addEventListener('click', () => startQuizButton.click());
+        backToGlossaryBtn.addEventListener('click', () => {
+            currentCardIndex = 0;
+            switchScreen('glossary-screen');
+            displayGlossaryCard();
+        });
+
+    </script>
+</body>
+</html>
